@@ -3,7 +3,7 @@
 
 .vscode
 obj
-
+philo/philo
 # Object files
 *.o
 *.ko

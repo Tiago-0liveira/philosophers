@@ -6,7 +6,11 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/12/15 16:44:56 by tiagoliv         ###   ########.fr       */
+=======
+/*   Updated: 2023/12/05 15:47:04 by tiagoliv         ###   ########.fr       */
+>>>>>>> 1f1a3811551fe389bb825280407d17bcb13ecece
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +20,14 @@
 # include <stdio.h>
 # include <pthread.h>
 # include <stdbool.h>
+<<<<<<< HEAD
 # include <stdlib.h>
 # include <stdlib.h>
 # include <sys/time.h>
 # include <unistd.h>
+=======
+# include <sys/time.h>
+>>>>>>> 1f1a3811551fe389bb825280407d17bcb13ecece
 
 # define USAGE "Usage: ./philo <n_philo> <time_to_die> \
 <time_to_eat> <time_to_sleep> [<number_of_times_each_philosopher_must_eat>]"
@@ -69,6 +77,7 @@ typedef struct s_table {
 
 typedef struct s_philo {
 	pthread_t			thread_id;
+<<<<<<< HEAD
 	size_t				philo_id;
 	size_t				eat_count;
 	size_t				action_time_elapsed;
@@ -109,5 +118,24 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo);
 void	start_threads(t_table *table);
 bool	is_anyone_dead(t_table *table);
 // table.c
+=======
+	size_t				eat_count;
+	size_t				action_time_elapsed;
+	enum e_philo_state	state;
+	pthread_mutex_t		*philo_mutex;
+}	t_philo;
+
+typedef struct s_table {
+	size_t				n_philo;
+	size_t				time_to_die;
+	size_t				time_to_eat;
+	size_t				time_to_sleep;
+	size_t				start_millis;
+	t_philo				*philos;
+}	t_table;
+>>>>>>> 1f1a3811551fe389bb825280407d17bcb13ecece
+
+size_t	get_milis(struct timeval *tv);
+void	milisleep(size_t	milis);
 
 #endif

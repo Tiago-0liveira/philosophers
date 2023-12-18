@@ -6,7 +6,11 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:04:32 by tiagoliv          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/12/15 16:23:28 by tiagoliv         ###   ########.fr       */
+=======
+/*   Updated: 2023/12/05 15:47:26 by tiagoliv         ###   ########.fr       */
+>>>>>>> 1f1a3811551fe389bb825280407d17bcb13ecece
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +18,39 @@
 
 int	main(int argc, char *argv[])
 {
+<<<<<<< HEAD
 	t_table	table;
 
 	if (!check_args(argc, argv))
 		return (1); // check subject for error handling
 	load_args(&table, argc, argv);
 	start_simulation(&table);
+=======
+	//check_args(argc, argv);
+	(void)argc;
+	(void)argv;
+	milisleep(1000);
+>>>>>>> 1f1a3811551fe389bb825280407d17bcb13ecece
 	return (0);
+}
+
+size_t	get_milis(struct timeval *tv)
+{
+	return (tv->tv_sec * 1000 + tv->tv_usec / 1000);
+}
+
+void	milisleep(size_t	milis)
+{
+	struct timeval	beg;
+	struct timeval	end;
+
+	gettimeofday(&beg, NULL);
+	while (1)
+	{
+		gettimeofday(&end, NULL);
+		if ((get_milis(&end) - get_milis(&beg)) >= milis)
+			return ;
+	}
 }
 
 bool	check_args(int argc, char *argv[])
@@ -32,6 +62,7 @@ bool	check_args(int argc, char *argv[])
 		return (false);
 	}
 	return (true);
+<<<<<<< HEAD
 }
 
 void	load_args(t_table *table, int argc, char *argv[])
@@ -101,4 +132,6 @@ void	free_and_exit(t_table *table)
 	free(table->forks);
 	free(table->philos);
 	exit(1);
+=======
+>>>>>>> 1f1a3811551fe389bb825280407d17bcb13ecece
 }
