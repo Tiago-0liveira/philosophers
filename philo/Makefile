@@ -1,9 +1,12 @@
 NAME = philo
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g 
+CFLAGS = -Wall -Wextra -Werror -g -pthread
 
-SRC = main.c 
+SRC = main.c \
+		fork.c \
+		philo.c \
+		utils.c
 
 includefolder = include
 INCLUDES = -I $(includefolder)
