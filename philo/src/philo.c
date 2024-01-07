@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:04:49 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/15 16:27:16 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2023/12/19 16:02:01 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ t_philo	*make_philo(size_t id, t_table *table, t_fork *right_fork)
 	philo->state = THINKING;
 	philo->philo_mutex = malloc(sizeof(pthread_mutex_t));
 	if (!philo->philo_mutex)
-		return (free_ptr_and_return_null(&philo));
+		return (free_ptr_and_return_null((void *)&philo));
 	if (pthread_mutex_init(philo->philo_mutex, NULL) != 0)
-		return (free_ptr_and_return_null(&philo));
+		return (free_ptr_and_return_null((void *)&philo));
 	philo->left_fork = NULL;
 	philo->right_fork = right_fork;
 	philo->table = table;
@@ -54,26 +54,26 @@ void	philo_eat(t_philo *philo)
 		return (free_and_exit(philo->table));
 	pthread_mutex_lock(philo->left_fork->mutex);
 	pthread_mutex_lock(philo->right_fork->mutex);
-	phtread_mutex_lokc(philo->philo_mutex);
+	pthread_mutex_lock(philo->philo_mutex);
 	philo->state = EATING;
 	print_philo_state(TOOK_FORK, philo);
 	print_philo_state(EATING, philo);
 	mysleep(philo->table->time_to_eat);
 	philo->last_eat_time = get_time_millis();
 	philo->eat_count++;
-	phtread_mutex_unlock(philo->left_fork->mutex);
-	phtread_mutex_unlock(philo->right_fork->mutex);
-	phtread_mutex_unlock(philo->philo_mutex);
+	pthread_mutex_unlock(philo->left_fork->mutex);
+	pthread_mutex_unlock(philo->right_fork->mutex);
+	pthread_mutex_unlock(philo->philo_mutex);
 }
 
 void	philo_think(t_philo *philo)
 {
 	if (is_anyone_dead(philo->table))
 		return (free_and_exit(philo->table));
-	phtread_mutex_lock(philo->philo_mutex);
+	pthread_mutex_lock(philo->philo_mutex);
 	philo->state = THINKING;
 	print_philo_state(philo->state, philo);
-	phtread_mutex_unlock(philo->philo_mutex);
+	pthread_mutex_unlock(philo->philo_mutex);
 	mysleep(philo->table->time_to_sleep);
 }
 
@@ -81,9 +81,9 @@ void	philo_sleep(t_philo *philo)
 {
 	if (is_anyone_dead(philo->table))
 		return (free_and_exit(philo->table));
-	phtread_mutex_lock(philo->philo_mutex);
+	pthread_mutex_lock(philo->philo_mutex);
 	philo->state = SLEEPING;
 	print_philo_state(philo->state, philo);
-	phtread_mutex_unlock(philo->philo_mutex);
+	pthread_mutex_unlock(philo->philo_mutex);
 	mysleep(philo->table->time_to_sleep);
 }

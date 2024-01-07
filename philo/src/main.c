@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:04:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/19 00:16:17 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2023/12/19 16:09:17 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,29 +69,6 @@ void	load_args(t_table *table, int argc, char *argv[])
 		printf("%s\n", USAGE);
 		exit(1);
 	}
-}
-
-void	start_simulation(t_table *table)
-{
-	size_t	i;
-
-	i = 0;
-	table->forks = malloc(sizeof(t_fork *) * table->n_philo);
-	table->philos = malloc(sizeof(t_philo *) * table->n_philo);
-	if (!table->forks || !table->philos)
-		free_and_exit(table);
-	while (i < table->n_philo)
-	{
-		table->forks[i] = make_fork();
-		if (!table->forks[i])
-			free_and_exit(table);
-		table->philos[i] = make_philo(i, table, table->forks[i]);
-		if (!table->philos[i])
-			free_and_exit(table);
-		i++;
-	}
-	assign_left_forks(table);
-	start_threads(table);
 }
 
 void	free_and_exit(t_table *table)

@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 15:38:06 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/15 16:46:56 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2023/12/19 16:09:25 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo)
 {
 	size_t	elapsed_time;
 
-	phtread_mutex_lock(philo->table->print_mutex);
+	pthread_mutex_lock(philo->table->print_mutex);
 	elapsed_time = get_elapsed_time(philo->table->start_time);
 	if (state == THINKING)
 		printf(PHILO_FORMAT_THINKING, elapsed_time, philo->philo_id);
@@ -30,7 +30,7 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo)
 		printf(PHILO_FORMAT_TOOK_FORK, elapsed_time, philo->philo_id);
 	else
 		printf("Error: invalid state\n");
-	phtread_mutex_unlock(philo->table->print_mutex);
+	pthread_mutex_unlock(philo->table->print_mutex);
 }
 
 void	start_threads(t_table *table)
@@ -47,6 +47,12 @@ void	start_threads(t_table *table)
 			printf("Error: could not create thread\n");
 			return ;
 		}
+		i++;
+	}
+	i = 0;
+	while (i < table->n_philo)
+	{
+		pthread_join(table->philos[i]->thread_id, NULL);
 		i++;
 	}
 }
@@ -72,11 +78,34 @@ bool	check_last_meal_time(t_philo *philo)
 	elapsed_time = get_elapsed_time(philo->last_eat_time);
 	if (elapsed_time > philo->table->time_to_die)
 	{
-		phtread_mutex_lock(philo->philo_mutex);
+		pthread_mutex_lock(philo->philo_mutex);
 		philo->state = DEAD;
 		print_philo_state(DEAD, philo);
-		phtread_mutex_unlock(philo->philo_mutex);
+		pthread_mutex_unlock(philo->philo_mutex);
 		return (true);
 	}
 	return (false);
+}
+
+void	start_simulation(t_table *table)
+{
+	size_t	i;
+
+	i = 0;
+	table->forks = malloc(sizeof(t_fork *) * table->n_philo);
+	table->philos = malloc(sizeof(t_philo *) * table->n_philo);
+	if (!table->forks || !table->philos)
+		free_and_exit(table);
+	while (i < table->n_philo)
+	{
+		table->forks[i] = make_fork();
+		if (!table->forks[i])
+			free_and_exit(table);
+		table->philos[i] = make_philo(i, table, table->forks[i]);
+		if (!table->philos[i])
+			free_and_exit(table);
+		i++;
+	}
+	assign_left_forks(table);
+	start_threads(table);
 }

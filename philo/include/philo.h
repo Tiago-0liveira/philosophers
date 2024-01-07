@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/19 00:16:01 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2023/12/19 16:23:26 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,11 @@
 # define K * 1000
 # define BASE_MICROSEC_SLEEP 50
 
-# define PHILO_FORMAT_THINKING "%lu %d is thinking\n"
-# define PHILO_FORMAT_EATING "%lu %d is eating\n"
-# define PHILO_FORMAT_SLEEPING "%lu %d is sleeping\n"
-# define PHILO_FORMAT_DIED "%lu %d died\n"
-# define PHILO_FORMAT_TOOK_FORK "%lu %d has taken a fork\n"
+# define PHILO_FORMAT_THINKING "%lu %lu is thinking\n"
+# define PHILO_FORMAT_EATING "%lu %lu is eating\n"
+# define PHILO_FORMAT_SLEEPING "%lu %lu is sleeping\n"
+# define PHILO_FORMAT_DIED "%lu %lu died\n"
+# define PHILO_FORMAT_TOOK_FORK "%lu %lu has taken a fork\n"
 
 enum e_philo_state {
 	THINKING,

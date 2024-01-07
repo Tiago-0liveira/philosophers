@@ -6,7 +6,8 @@ CFLAGS = -Wall -Wextra -Werror -g -pthread
 SRC = main.c \
 		fork.c \
 		philo.c \
-		utils.c
+		utils.c \
+		philo_utils.c
 
 includefolder = include
 INCLUDES = -I $(includefolder)
