@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:04:49 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/19 16:02:01 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/12 16:40:33 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	philo_routine(void *arg)
 
 void	philo_eat(t_philo *philo)
 {
-	if (is_anyone_dead(philo->table))
+	if (is_anyone_dead(philo->table) || check_last_meal_time(philo))
 		return (free_and_exit(philo->table));
 	pthread_mutex_lock(philo->left_fork->mutex);
 	pthread_mutex_lock(philo->right_fork->mutex);

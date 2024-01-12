@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 16:02:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/15 16:47:15 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/12 16:33:27 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,4 +24,33 @@ void	table_monitor(t_table *table)
 
 		mysleep(BASE_MICROSEC_SLEEP * 2);
 	}
+}
+
+void	table_init(t_table *table, int argc, char *argv[])
+{
+	table->n_philo = ft_atoi(argv[1]);
+	table->time_to_die = ft_atoi(argv[2]);
+	table->time_to_eat = ft_atoi(argv[3]);
+	table->time_to_sleep = ft_atoi(argv[4]);
+	if (argc == 6)
+		table->n_eat = ft_atoi(argv[5]);
+	else
+		table->n_eat = -1;
+	if (table->n_philo < 1 || table->time_to_die < 1 || table->time_to_eat < 1
+		|| table->time_to_sleep < 1 || table->n_eat < 1)
+	{
+		printf("%s\n", USAGE);
+		exit(1);
+	}
+	table->print_mutex = malloc(sizeof(pthread_mutex_t));
+	if (!table->print_mutex)
+	{
+		printf("Error: malloc failed!\n");
+		exit(1);
+	}
+	if (pthread_mutex_init(table->print_mutex, NULL) != 0)
+	{
+		printf("Error: mutex init failed!\n");
+		exit(1);
+	}	
 }

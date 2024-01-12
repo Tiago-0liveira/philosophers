@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/19 16:23:26 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/12 16:36:45 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,6 @@ typedef struct s_philo {
 
 // main.c
 bool	check_args(int argc, char *argv[]);
-void	load_args(t_table *table, int argc, char *argv[]);
 void	start_simulation(t_table *table);
 void	free_and_exit(t_table *table);
 
@@ -108,9 +107,11 @@ int		ft_atoi(const char *nptr);
 void	print_philo_state(enum e_philo_state state, t_philo *philo);
 void	start_threads(t_table *table);
 bool	is_anyone_dead(t_table *table);
+bool	check_last_meal_time(t_philo *philo);
 // table.c
 
 size_t	get_milis(struct timeval *tv);
 void	milisleep(size_t	milis);
+void	table_init(t_table *table, int argc, char *argv[]);
 
 #endif

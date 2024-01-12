@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:04:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/19 16:09:17 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/12 16:46:15 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int	main(int argc, char *argv[])
 
 	if (!check_args(argc, argv))
 		return (1); // check subject for error handling
-	load_args(&table, argc, argv);
+	table_init(&table, argc, argv);
 	start_simulation(&table);
 	return (0);
 }
@@ -53,34 +53,18 @@ bool	check_args(int argc, char *argv[])
 	return (true);
 }
 
-void	load_args(t_table *table, int argc, char *argv[])
-{
-	table->n_philo = ft_atoi(argv[1]);
-	table->time_to_die = ft_atoi(argv[2]);
-	table->time_to_eat = ft_atoi(argv[3]);
-	table->time_to_sleep = ft_atoi(argv[4]);
-	if (argc == 6)
-		table->n_eat = ft_atoi(argv[5]);
-	else
-		table->n_eat = -1;
-	if (table->n_philo < 1 || table->time_to_die < 1 || table->time_to_eat < 1
-		|| table->time_to_sleep < 1 || table->n_eat < 1)
-	{
-		printf("%s\n", USAGE);
-		exit(1);
-	}
-}
-
 void	free_and_exit(t_table *table)
 {
 	size_t	i;
 
 	i = 0;
+	printf("here\n");
 	while (i < table->n_philo)
 	{
 		pthread_join(table->philos[i]->thread_id, NULL);
 		i++;
 	}
+	printf("done\n");
 	i = 0;
 	while (i < table->n_philo)
 	{
@@ -94,6 +78,7 @@ void	free_and_exit(t_table *table)
 			free(table->philos[i]);
 		i++;
 	}
+	printf("done2\n");
 	free(table->forks);
 	free(table->philos);
 	exit(1);

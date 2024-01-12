@@ -7,6 +7,7 @@ SRC = main.c \
 		fork.c \
 		philo.c \
 		utils.c \
+		table.c \
 		philo_utils.c
 
 includefolder = include

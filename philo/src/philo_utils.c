@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 15:38:06 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/19 16:09:25 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/12 16:41:11 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,8 @@ bool	check_last_meal_time(t_philo *philo)
 {
 	size_t	elapsed_time;
 
-	elapsed_time = get_elapsed_time(philo->last_eat_time);
+	elapsed_time = get_elapsed_time(philo->table->start_time);
+	//TODO: printf("id: %lu, elapsed_time: %lu\n", philo->philo_id, elapsed_time);
 	if (elapsed_time > philo->table->time_to_die)
 	{
 		pthread_mutex_lock(philo->philo_mutex);
