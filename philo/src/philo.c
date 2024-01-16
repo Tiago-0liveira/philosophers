@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:04:49 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/12 16:40:33 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/16 17:35:21 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,26 +40,38 @@ void	philo_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (philo->state != DEAD || !is_anyone_dead(philo->table))
+	if (philo->philo_id % 2)
+		mysleep(philo->table->time_to_die / 2);
+	pthread_mutex_lock(philo->table->mutex);
+	while (philo->table->running && philo->state != DEAD)
 	{
+		pthread_mutex_unlock(philo->table->mutex);
 		philo_eat(philo);
+		if (is_anyone_dead(philo->table))
+			continue;
 		philo_sleep(philo);
+		if (is_anyone_dead(philo->table))
+			continue;
 		philo_think(philo);
+		pthread_mutex_lock(philo->table->mutex);
 	}
+	pthread_mutex_unlock(philo->table->mutex);
 }
 
 void	philo_eat(t_philo *philo)
 {
-	if (is_anyone_dead(philo->table) || check_last_meal_time(philo))
-		return (free_and_exit(philo->table));
+	pthread_mutex_lock(philo->table->mutex);
+	if (!philo->table->running)
+		return (pthread_mutex_unlock(philo->table->mutex), free_and_exit(philo->table));
+	pthread_mutex_unlock(philo->table->mutex);
 	pthread_mutex_lock(philo->left_fork->mutex);
 	pthread_mutex_lock(philo->right_fork->mutex);
 	pthread_mutex_lock(philo->philo_mutex);
 	philo->state = EATING;
 	print_philo_state(TOOK_FORK, philo);
 	print_philo_state(EATING, philo);
+	philo->last_eat_time = get_elapsed_time(philo->table->start_time);
 	mysleep(philo->table->time_to_eat);
-	philo->last_eat_time = get_time_millis();
 	philo->eat_count++;
 	pthread_mutex_unlock(philo->left_fork->mutex);
 	pthread_mutex_unlock(philo->right_fork->mutex);
@@ -68,19 +80,23 @@ void	philo_eat(t_philo *philo)
 
 void	philo_think(t_philo *philo)
 {
-	if (is_anyone_dead(philo->table))
-		return (free_and_exit(philo->table));
+	pthread_mutex_lock(philo->table->mutex);
+	if (!philo->table->running)
+		return (pthread_mutex_unlock(philo->table->mutex), free_and_exit(philo->table));
+	pthread_mutex_unlock(philo->table->mutex);
 	pthread_mutex_lock(philo->philo_mutex);
 	philo->state = THINKING;
-	print_philo_state(philo->state, philo);
 	pthread_mutex_unlock(philo->philo_mutex);
-	mysleep(philo->table->time_to_sleep);
+	print_philo_state(philo->state, philo);
+	mysleep((philo->table->time_to_die - (get_elapsed_time(philo->table->start_time) - philo->last_eat_time)) / 2);
 }
 
 void	philo_sleep(t_philo *philo)
 {
-	if (is_anyone_dead(philo->table))
-		return (free_and_exit(philo->table));
+	pthread_mutex_lock(philo->table->mutex);
+	if (!philo->table->running)
+		return (pthread_mutex_unlock(philo->table->mutex), free_and_exit(philo->table));
+	pthread_mutex_unlock(philo->table->mutex);
 	pthread_mutex_lock(philo->philo_mutex);
 	philo->state = SLEEPING;
 	print_philo_state(philo->state, philo);

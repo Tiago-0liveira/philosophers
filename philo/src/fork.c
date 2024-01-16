@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:20:47 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/15 16:23:05 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/16 14:56:20 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,5 +39,5 @@ void	assign_left_forks(t_table *table)
 	{
 		table->philos[i]->left_fork = table->forks[i - 1];
 		i++;
-	}
+	}	
 }

@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:04:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/12 16:46:15 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/16 16:06:03 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void	milisleep(size_t	milis)
 bool	check_args(int argc, char *argv[])
 {
 	(void)argv;
-	if (argc < 4 || argc > 5)
+	if (argc < 5 || argc > 6)
 	{
 		printf("%s\n", USAGE);
 		return (false);

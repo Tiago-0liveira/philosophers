@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/12 16:36:45 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/16 15:51:12 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ typedef struct s_table {
 	size_t			time_to_sleep;
 	size_t			start_time;
 	size_t			n_eat;
+	bool			running;
 	t_fork			**forks;
 	t_philo			**philos; // maybe unnecessary
 	pthread_mutex_t	*mutex;
@@ -109,7 +110,7 @@ void	start_threads(t_table *table);
 bool	is_anyone_dead(t_table *table);
 bool	check_last_meal_time(t_philo *philo);
 // table.c
-
+void	table_monitor(void *arg);
 size_t	get_milis(struct timeval *tv);
 void	milisleep(size_t	milis);
 void	table_init(t_table *table, int argc, char *argv[]);

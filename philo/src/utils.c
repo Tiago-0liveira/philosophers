@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/13 17:07:12 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/15 16:45:39 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/16 15:40:11 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ size_t	get_time_millis(void)
 	size_t			millis;
 
 	gettimeofday(&time, NULL);
-	millis = time.tv_sec K + time.tv_usec / 1000;
+	millis = (time.tv_sec K) + (time.tv_usec / 1000);
 	return (millis);
 }
 
