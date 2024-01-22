@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/13 17:07:12 by tiagoliv          #+#    #+#             */
-/*   Updated: 2023/12/15 16:45:39 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/22 19:43:37 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ size_t	get_time_millis(void)
 	size_t			millis;
 
 	gettimeofday(&time, NULL);
-	millis = time.tv_sec K + time.tv_usec / 1000;
+	millis = time.tv_sec * 1000 + time.tv_usec / 1000;
 	return (millis);
 }
 
@@ -28,17 +28,7 @@ void	mysleep(size_t millis)
 
 	start = get_time_millis();
 	while (get_time_millis() - start < millis)
-		usleep(BASE_MICROSEC_SLEEP);
-}
-
-void	*free_ptr_and_return_null(void **ptr)
-{
-	if (*ptr)
-	{
-		free(*ptr);
-		*ptr = NULL;
-	}
-	return (NULL);
+		usleep(100);
 }
 
 size_t	get_elapsed_time(size_t start)

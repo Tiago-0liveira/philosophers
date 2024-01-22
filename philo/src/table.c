@@ -6,51 +6,53 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 16:02:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/12 16:33:27 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/22 21:22:31 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	table_monitor(t_table *table)
+bool	validate_args(int argc, char **argv)
 {
-	while (true)
-	{
-		if (is_anyone_dead(table))
-		{
-			printf("someone died\n");
-			return ;
-		}
+	size_t	i;
+	size_t	j;
 
-		mysleep(BASE_MICROSEC_SLEEP * 2);
+	i = 0;
+	while (i < (size_t) argc)
+	{
+		j = 0;
+		while (argv[i][j])
+		{
+			if (argv[i][j] < '0' || argv[i][j] > '9')
+				return (false);
+			j++;
+		}
+		i++;
 	}
+	return (true);
 }
 
 void	table_init(t_table *table, int argc, char *argv[])
 {
+	if (!validate_args(argc - 1, &argv[1]))
+		exit(1);
+	table->stop = false;
 	table->n_philo = ft_atoi(argv[1]);
 	table->time_to_die = ft_atoi(argv[2]);
 	table->time_to_eat = ft_atoi(argv[3]);
 	table->time_to_sleep = ft_atoi(argv[4]);
+	table->n_eat = -1;
 	if (argc == 6)
+	{
 		table->n_eat = ft_atoi(argv[5]);
-	else
-		table->n_eat = -1;
-	if (table->n_philo < 1 || table->time_to_die < 1 || table->time_to_eat < 1
-		|| table->time_to_sleep < 1 || table->n_eat < 1)
-	{
-		printf("%s\n", USAGE);
-		exit(1);
+		if (table->n_eat == 0)
+			exit(1);
 	}
-	table->print_mutex = malloc(sizeof(pthread_mutex_t));
-	if (!table->print_mutex)
-	{
-		printf("Error: malloc failed!\n");
+	if (table->n_philo == 0)
 		exit(1);
-	}
-	if (pthread_mutex_init(table->print_mutex, NULL) != 0)
-	{
-		printf("Error: mutex init failed!\n");
-		exit(1);
-	}	
+	pthread_mutex_init(&table->print_mutex, NULL);
+	pthread_mutex_init(&table->mutex, NULL);
+	pthread_mutex_init(&table->dead_mutex, NULL);
+	pthread_mutex_init(&table->eat_mutex, NULL);
+	pthread_mutex_init(&table->stop_mutex, NULL);
 }

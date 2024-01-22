@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/12 16:36:45 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/22 20:38:02 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 # define USAGE "Usage: ./philo <n_philo> <time_to_die> \
 <time_to_eat> <time_to_sleep> [<number_of_times_each_philosopher_must_eat>]"
 
-# define K * 1000
 # define BASE_MICROSEC_SLEEP 50
 
 # define PHILO_FORMAT_THINKING "%lu %lu is thinking\n"
@@ -38,7 +37,8 @@ enum e_philo_state {
 	EATING,
 	SLEEPING,
 	DEAD,
-	TOOK_FORK
+	TOOK_FORK,
+	FINNISHED
 };
 
 enum e_fork_state {
@@ -46,10 +46,7 @@ enum e_fork_state {
 	USED
 };
 
-typedef struct s_fork {
-	pthread_mutex_t		*mutex;
-	//enum e_fork_state	state;
-}	t_fork;
+typedef pthread_mutex_t	t_fork;
 
 typedef struct s_philo	t_philo;
 typedef struct s_table	t_table;
@@ -61,20 +58,23 @@ typedef struct s_table {
 	size_t			time_to_sleep;
 	size_t			start_time;
 	size_t			n_eat;
-	t_fork			**forks;
-	t_philo			**philos; // maybe unnecessary
-	pthread_mutex_t	*mutex;
-	pthread_mutex_t	*print_mutex;
+	t_fork			*forks;
+	t_philo			*philos;
+	pthread_mutex_t	mutex;
+	pthread_mutex_t	print_mutex;
+	pthread_mutex_t	dead_mutex;
+	pthread_mutex_t	eat_mutex;
+	pthread_mutex_t	stop_mutex;
+	bool			stop;
 }	t_table;
 
 typedef struct s_philo {
 	pthread_t			thread_id;
 	size_t				philo_id;
-	size_t				eat_count;
-	size_t				action_time_elapsed;
 	size_t				last_eat_time;
 	enum e_philo_state	state;
-	pthread_mutex_t		*philo_mutex; //maybe unnecessary
+	pthread_mutex_t		philo_mutex;
+	size_t				n_eat;
 	t_fork				*left_fork;
 	t_fork				*right_fork;
 	t_table				*table;
@@ -86,32 +86,29 @@ void	start_simulation(t_table *table);
 void	free_and_exit(t_table *table);
 
 // philo.c
-t_philo	*make_philo(size_t id, t_table *table, t_fork *right_fork);
-void	philo_routine(void *arg);
-void	philo_eat(t_philo *philo);
-void	philo_think(t_philo *philo);
-void	philo_sleep(t_philo *philo);
+void	init_philo(t_philo *philo, size_t id, t_table *table,
+			t_fork *right_fork);
+void	*philo_routine(void *arg);
+bool	philo_eat(t_philo *philo);
+bool	take_forks(t_philo *philo);
+void	*check_philo_death(void *arg);
 
 // fork.c
-t_fork	*make_fork(void);
 void	assign_left_forks(t_table *table);
 
 // utils.c
 size_t	get_time_millis(void);
 void	mysleep(size_t millis);
-void	*free_ptr_and_return_null(void **ptr);
 size_t	get_elapsed_time(size_t start);
 int		ft_atoi(const char *nptr);
 
 // philo_utils.c
 void	print_philo_state(enum e_philo_state state, t_philo *philo);
 void	start_threads(t_table *table);
-bool	is_anyone_dead(t_table *table);
-bool	check_last_meal_time(t_philo *philo);
-// table.c
+void	start_simulation(t_table *table);
+bool	is_dead(t_philo *philo, bool dead_flag);
 
-size_t	get_milis(struct timeval *tv);
-void	milisleep(size_t	milis);
+// table.c
 void	table_init(t_table *table, int argc, char *argv[]);
 
 #endif
