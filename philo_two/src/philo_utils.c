@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 15:38:06 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/24 19:04:40 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/24 18:12:31 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,10 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo)
 {
 	size_t	elapsed_time;
 
-	printf("hereher1\n");
-	if (is_dead(philo, false) || philo->table->stop)
+	if (is_dead(philo, false))
 		return ;
-	printf("hereher2\n");
 	pthread_mutex_lock(&philo->table->print_mutex);
-	elapsed_time = philo->last_eat_time - philo->table->start_time;
+	elapsed_time = get_time_millis() - philo->table->start_time;
 	if (state == THINKING)
 		printf(PHILO_FORMAT_THINKING, elapsed_time, philo->philo_id);
 	else if (state == EATING)
@@ -51,6 +49,8 @@ void	start_threads(t_table *table)
 			printf("Error: could not create thread\n");
 			return ;
 		}
+		printf("%zu left:%p right:%p\n", i, table->philos[i].left_fork,
+				table->philos[i].right_fork);
 		i++;
 	}
 }
@@ -76,17 +76,14 @@ void	start_simulation(t_table *table)
 
 bool	is_dead(t_philo *philo, bool dead_flag)
 {
-	pthread_mutex_lock(&philo->table->dead_mutex);
+	pthread_mutex_lock(&philo->table->stop_mutex);
 	if (dead_flag)
 		philo->table->stop = true;
-	if (philo->last_eat_time == 0)
-		philo->last_eat_time = get_time_millis();
-	if (philo->table->stop || get_time_millis() - philo->last_eat_time
-		>= philo->table->time_to_die)
+	if (philo->table->stop)
 	{
-		pthread_mutex_unlock(&philo->table->dead_mutex);
+		pthread_mutex_unlock(&philo->table->stop_mutex);
 		return (true);
 	}
-	pthread_mutex_unlock(&philo->table->dead_mutex);
+	pthread_mutex_unlock(&philo->table->stop_mutex);
 	return (false);
 }

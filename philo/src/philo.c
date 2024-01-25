@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:04:49 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/22 21:24:31 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/24 19:04:29 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,17 +28,22 @@ void	init_philo(t_philo *philo, size_t id, t_table *table,
 void	*philo_routine(void *arg)
 {
 	t_philo		*philo;
-	pthread_t	monitor_thread;
+	//pthread_t	monitor_thread;
 
 	philo = (t_philo *)arg;
 	if ((philo->philo_id + 1) % 2 == 0)
-		mysleep(philo->table->time_to_eat / 10);
+		mysleep(philo->table->time_to_eat / 2);
 	while (!is_dead(philo, false))
 	{
-		pthread_create(&monitor_thread, NULL, check_philo_death, philo);
-		take_forks(philo);
+		//pthread_create(&monitor_thread, NULL, check_philo_death, philo);
+		if (!take_forks(philo))
+		{
+			print_philo_state(DEAD, philo);
+			is_dead(philo, true);
+			return (NULL);
+		}
 		philo_eat(philo);
-		pthread_detach(monitor_thread);
+		//pthread_detach(monitor_thread);
 		if (philo->table->n_eat != (size_t) - 1)
 		{
 			pthread_mutex_lock(&philo->table->dead_mutex);
@@ -60,7 +65,7 @@ bool	take_forks(t_philo *philo)
 	print_philo_state(TOOK_FORK, philo);
 	if (philo->table->n_philo == 1)
 	{
-		mysleep(philo->table->time_to_die * 2);
+		mysleep(philo->table->time_to_die);
 		return (false);
 	}
 	pthread_mutex_lock(philo->left_fork);
