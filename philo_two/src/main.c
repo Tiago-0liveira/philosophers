@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:04:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/22 20:43:33 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/29 17:15:15 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void	free_and_exit(t_table *table)
 		pthread_join(table->philos[i].thread_id, NULL);
 		i++;
 	}
+	pthread_join(table->hunger_thread, NULL);
 	free(table->forks);
 	free(table->philos);
 }

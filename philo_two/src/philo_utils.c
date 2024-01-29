@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 15:38:06 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/24 18:12:31 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/29 17:56:39 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,16 +43,18 @@ void	start_threads(t_table *table)
 	i = 0;
 	while (i < table->n_philo)
 	{
+		/*pthread_mutex_lock(&table->stop_mutex);
+		table->philos[i].last_eat_time = table->start_time;
+		pthread_mutex_unlock(&table->stop_mutex);*/
 		if (pthread_create(&table->philos[i].thread_id, NULL,
 				philo_routine, &table->philos[i]) != 0)
 		{
 			printf("Error: could not create thread\n");
 			return ;
 		}
-		printf("%zu left:%p right:%p\n", i, table->philos[i].left_fork,
-				table->philos[i].right_fork);
 		i++;
 	}
+	pthread_create(&table->hunger_thread, NULL, check_death, table);
 }
 
 void	start_simulation(t_table *table)
@@ -86,4 +88,33 @@ bool	is_dead(t_philo *philo, bool dead_flag)
 	}
 	pthread_mutex_unlock(&philo->table->stop_mutex);
 	return (false);
+}
+
+void	*check_death(void *arg)
+{
+	t_table	*table;
+	size_t	phi;
+
+	table = arg;
+	phi = 0;
+	pthread_mutex_lock(&table->stop_mutex);
+	while (!table->stop)
+	{
+		if (phi == table->n_philo)
+			phi = 0;
+		pthread_mutex_unlock(&table->stop_mutex);
+		if (am_i_dead(&table->philos[phi]))
+		{
+			printf("dingding someone died\n");
+			pthread_mutex_lock(&table->stop_mutex);
+			table->stop = true;
+			pthread_mutex_unlock(&table->stop_mutex);
+			return (NULL);
+		}
+		pthread_mutex_lock(&table->stop_mutex);
+		phi++;
+	}
+	pthread_mutex_unlock(&table->stop_mutex);
+	
+	return (NULL);
 }

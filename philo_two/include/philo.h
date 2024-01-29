@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/24 16:30:30 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/29 17:09:10 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ typedef struct s_table {
 	t_philo			*philos;
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	stop_mutex;
+	pthread_t		hunger_thread;
 	bool			stop;
 }	t_table;
 
@@ -97,6 +98,7 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo);
 void	start_threads(t_table *table);
 void	start_simulation(t_table *table);
 bool	is_dead(t_philo *philo, bool dead_flag);
+void	*check_death(void *arg);
 
 // table.c
 void	table_init(t_table *table, int argc, char *argv[]);

@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:04:49 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/24 18:50:30 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/29 17:59:12 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,47 +29,38 @@ void	*philo_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	if (philo->philo_id % 2 == 0)
-		mysleep(philo->table->time_to_eat / 10);
-	while (!is_dead(philo, false))
+	if ((philo->philo_id + 1) % 2 == 0)
 	{
-		//printf("%zu loop start\n", philo->philo_id);
-		if (!take_forks(philo))
-		{
-			printf("%zu will cancel thread 1\n", philo->philo_id);
-			return (NULL);
-		}
-		//printf("%zu here1\n", philo->philo_id);
-		//printf("%zu %zu is eating \n", get_elapsed_time(philo->table->start_time), philo->philo_id);
-		mysleep(philo->table->time_to_eat);
-		/*if (am_i_dead(philo))
-		{
-			printf("%zu will cancel thread 2\n", philo->philo_id);
-			return (NULL);
-		}*/
-		//printf("%zu here2\n", philo->philo_id);
-		if (philo->table->n_eat != (size_t) - 1 && philo->table->n_eat == philo->n_eat)
-		{
-			printf("%zu will cancel thread 3\n", philo->philo_id);
-			return (NULL);
-		}
-		//printf("%zu here\n", philo->philo_id);
+		//printf("%zu will beg sleep %zums\n", philo->philo_id, philo->table->time_to_eat / 2);
+		mysleep(philo->table->time_to_eat / 2);
 	}
+	pthread_mutex_lock(&philo->table->stop_mutex);
+	while (!philo->table->stop)
+	{
+		pthread_mutex_unlock(&philo->table->stop_mutex);
+		if (!take_forks(philo) || is_dead(philo, false) || !philo_eat(philo))
+		{
+			print_philo_state(DEAD, philo);
+			printf("%zu setting true here\n", philo->philo_id);
+			is_dead(philo, true);
+			//printf("%zu thread ended\n", philo->philo_id);
+			return (NULL);
+		}
+		if (philo->table->n_eat != (size_t) - 1 && philo->table->n_eat == philo->n_eat)
+			return (NULL);
+		pthread_mutex_lock(&philo->table->stop_mutex);
+	}
+	pthread_mutex_unlock(&philo->table->stop_mutex);
+	//printf("%zu thread ended\n", philo->philo_id);
 	return (NULL);
 }
 
 bool	take_forks(t_philo *philo)
 {
-	if (philo->philo_id % 2 && (philo->table->n_philo + 1) % 2)
-	{
-		//printf("%zu will take first fork %p\n", philo->philo_id, philo->left_fork);
-		pthread_mutex_lock(philo->left_fork);
-	}
-	else
-	{
-		//printf("%zu will take first fork %p\n", philo->philo_id, philo->right_fork);
+	if ((philo->philo_id + 1) % 2)
 		pthread_mutex_lock(philo->right_fork);
-	}
+	else
+		pthread_mutex_lock(philo->left_fork);
 	print_philo_state(TOOK_FORK, philo);
 	if (philo->table->n_philo == 1)
 	{
@@ -78,15 +69,10 @@ bool	take_forks(t_philo *philo)
 	}
 	/*else if (am_i_dead(philo))
 		return (false);*/
-	if (philo->philo_id % 2 && (philo->table->n_philo + 1) % 2)
-	{
-		pthread_mutex_lock(philo->right_fork);
-	}
-	else
-	{
-		//printf("%zu will take second fork %p\n", philo->philo_id, philo->left_fork);
+	if ((philo->philo_id + 1) % 2)
 		pthread_mutex_lock(philo->left_fork);
-	}
+	else
+		pthread_mutex_lock(philo->right_fork);
 	//printf("%zu took second fork\n", philo->philo_id);
 	print_philo_state(TOOK_FORK, philo);
 	return (true);
@@ -94,43 +80,57 @@ bool	take_forks(t_philo *philo)
 
 bool	philo_eat(t_philo *philo)
 {
-	printf("%zu here\n", philo->thread_id);
 	print_philo_state(EATING, philo);
+	//printf("%zu tel:%zu\n", philo->philo_id, get_time_millis() - philo->last_eat_time);
+	/*if (get_time_millis() - philo->last_eat_time + philo->table->time_to_eat > philo->table->time_to_die)
+	{
+		printf("%zu will weird sleep for %zums\n", philo->philo_id, philo->table->time_to_die - (get_time_millis() - philo->last_eat_time));
+		
+		mysleep(philo->table->time_to_die - (get_time_millis() - philo->last_eat_time));
+		return (false);
+	}*/
 	pthread_mutex_lock(&philo->philo_mutex);
 	philo->last_eat_time = get_time_millis();
 	philo->n_eat++;
 	pthread_mutex_unlock(&philo->philo_mutex);
-	printf("here\n");
 	mysleep(philo->table->time_to_eat);
-	if (philo->philo_id % 2 && (philo->table->n_philo + 1) % 2)
+	if (is_dead(philo, false))
+		return (false);
+	if ((philo->philo_id + 1) % 2)
 	{
-		pthread_mutex_unlock(philo->left_fork);
 		pthread_mutex_unlock(philo->right_fork);
+		pthread_mutex_unlock(philo->left_fork);
 	}
 	else
 	{
-		pthread_mutex_unlock(philo->right_fork);
 		pthread_mutex_unlock(philo->left_fork);
+		pthread_mutex_unlock(philo->right_fork);
 	}
 	print_philo_state(SLEEPING, philo);
 	mysleep(philo->table->time_to_sleep);
+	//printf("%zu here12\n", philo->philo_id);
+	if (am_i_dead(philo))
+		return (false);
 	print_philo_state(THINKING, philo);
-	return (true);
+	mysleep((philo->table->time_to_die - (get_time_millis() - philo->last_eat_time)) / 2);
+	return (is_dead(philo, false));
 }
 
 bool	am_i_dead(t_philo *philo)
 {
+	size_t	time;
+	//pthread_mutex_lock(&philo->philo_mutex);
 	if (philo->last_eat_time == 0)
 		philo->last_eat_time = get_time_millis();
-	/*printf("let:%zu|%d\n", get_time_millis() - philo->last_eat_time,
-		is_dead(philo, false) || (get_time_millis()
-			- philo->last_eat_time) >= philo->table->time_to_die);*/
-	if (is_dead(philo, false) || (get_time_millis()
-			- philo->last_eat_time) >= philo->table->time_to_die)
+	time = get_time_millis() - philo->last_eat_time;
+	if (is_dead(philo, false) || time >= philo->table->time_to_die)
 	{
+		printf("		%zu cond %d %d\n", philo->philo_id, time >= philo->table->time_to_die, is_dead(philo, false));
 		print_philo_state(DEAD, philo);
 		is_dead(philo, true);
+		//pthread_mutex_unlock(&philo->philo_mutex);
 		return (true);
 	}
+	//pthread_mutex_unlock(&philo->philo_mutex);
 	return (false);
 }
