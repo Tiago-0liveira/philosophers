@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/29 17:09:10 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/30 15:52:22 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ typedef struct s_philo {
 	size_t				n_eat;
 	t_fork				*left_fork;
 	t_fork				*right_fork;
-	t_table				*table;
+	bool				eating;
 }	t_philo;
 
 // main.c
@@ -77,8 +77,7 @@ void	start_simulation(t_table *table);
 void	free_and_exit(t_table *table);
 
 // philo.c
-void	init_philo(t_philo *philo, size_t id, t_table *table,
-			t_fork *right_fork);
+void	init_philo(t_philo *philo, size_t id, t_fork *right_fork);
 void	*philo_routine(void *arg);
 bool	take_forks(t_philo *philo);
 bool	philo_eat(t_philo *philo);
@@ -86,6 +85,7 @@ bool	am_i_dead(t_philo *philo);
 
 // fork.c
 void	assign_left_forks(t_table *table);
+void	unlock_forks(t_philo *philo);
 
 // utils.c
 size_t	get_time_millis(void);
@@ -97,10 +97,11 @@ int		ft_atoi(const char *nptr);
 void	print_philo_state(enum e_philo_state state, t_philo *philo);
 void	start_threads(t_table *table);
 void	start_simulation(t_table *table);
-bool	is_dead(t_philo *philo, bool dead_flag);
+bool	is_dead(bool dead_flag);
 void	*check_death(void *arg);
 
 // table.c
 void	table_init(t_table *table, int argc, char *argv[]);
+t_table	*table();
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 16:02:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/29 17:05:41 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/30 16:58:27 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,21 @@ void	table_init(t_table *table, int argc, char *argv[])
 		if (table->n_eat == 0)
 			exit(1);
 	}
-	if (table->n_philo == 0)
+	if (table->n_philo == 0 || table->time_to_die == 0 || table->time_to_eat == 0 || table->time_to_die == 0)
 		exit(1);
 	pthread_mutex_init(&table->print_mutex, NULL);
 	pthread_mutex_init(&table->stop_mutex, NULL);
+}
+
+t_table	*table()
+{
+	static t_table	*t;
+
+	if (!t)
+	{
+		t = malloc(sizeof(t_table));
+		if (!t)
+			exit(1);
+	}
+	return t;
 }

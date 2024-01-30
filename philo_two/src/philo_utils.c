@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 15:38:06 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/29 17:56:39 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/30 17:11:35 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo)
 {
 	size_t	elapsed_time;
 
-	if (is_dead(philo, false))
+	if (is_dead(false))
 		return ;
-	pthread_mutex_lock(&philo->table->print_mutex);
-	elapsed_time = get_time_millis() - philo->table->start_time;
+	pthread_mutex_lock(&table()->print_mutex);
+	elapsed_time = get_time_millis() - table()->start_time;
 	if (state == THINKING)
 		printf(PHILO_FORMAT_THINKING, elapsed_time, philo->philo_id);
 	else if (state == EATING)
@@ -32,7 +32,7 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo)
 		printf(PHILO_FORMAT_TOOK_FORK, elapsed_time, philo->philo_id);
 	else
 		printf("Error: invalid state\n");
-	pthread_mutex_unlock(&philo->table->print_mutex);
+	pthread_mutex_unlock(&table()->print_mutex);
 }
 
 void	start_threads(t_table *table)
@@ -43,9 +43,9 @@ void	start_threads(t_table *table)
 	i = 0;
 	while (i < table->n_philo)
 	{
-		/*pthread_mutex_lock(&table->stop_mutex);
+		pthread_mutex_lock(&table->philos[i].philo_mutex);
 		table->philos[i].last_eat_time = table->start_time;
-		pthread_mutex_unlock(&table->stop_mutex);*/
+		pthread_mutex_unlock(&table->philos[i].philo_mutex);
 		if (pthread_create(&table->philos[i].thread_id, NULL,
 				philo_routine, &table->philos[i]) != 0)
 		{
@@ -54,7 +54,7 @@ void	start_threads(t_table *table)
 		}
 		i++;
 	}
-	pthread_create(&table->hunger_thread, NULL, check_death, table);
+	//pthread_create(&table->hunger_thread, NULL, check_death, table);
 }
 
 void	start_simulation(t_table *table)
@@ -69,24 +69,24 @@ void	start_simulation(t_table *table)
 	while (i < table->n_philo)
 	{
 		pthread_mutex_init(&table->forks[i], NULL);
-		init_philo(&table->philos[i], i, table, &table->forks[i]);
+		init_philo(&table->philos[i], i, &table->forks[i]);
 		i++;
 	}
 	assign_left_forks(table);
 	start_threads(table);
 }
 
-bool	is_dead(t_philo *philo, bool dead_flag)
+bool	is_dead(bool dead_flag)
 {
-	pthread_mutex_lock(&philo->table->stop_mutex);
+	pthread_mutex_lock(&table()->stop_mutex);
 	if (dead_flag)
-		philo->table->stop = true;
-	if (philo->table->stop)
+		table()->stop = true;
+	if (table()->stop)
 	{
-		pthread_mutex_unlock(&philo->table->stop_mutex);
+		pthread_mutex_unlock(&table()->stop_mutex);
 		return (true);
 	}
-	pthread_mutex_unlock(&philo->table->stop_mutex);
+	pthread_mutex_unlock(&table()->stop_mutex);
 	return (false);
 }
 
@@ -97,24 +97,25 @@ void	*check_death(void *arg)
 
 	table = arg;
 	phi = 0;
-	pthread_mutex_lock(&table->stop_mutex);
-	while (!table->stop)
+	while (is_dead(false))
 	{
 		if (phi == table->n_philo)
+		{
+			mysleep(1);
 			phi = 0;
-		pthread_mutex_unlock(&table->stop_mutex);
+		}
+		pthread_mutex_lock(&table->philos[phi].philo_mutex);
 		if (am_i_dead(&table->philos[phi]))
 		{
-			printf("dingding someone died\n");
-			pthread_mutex_lock(&table->stop_mutex);
-			table->stop = true;
-			pthread_mutex_unlock(&table->stop_mutex);
+			pthread_mutex_unlock(&table->philos[phi].philo_mutex);
+			print_philo_state(DEAD, &table->philos[phi]);
+			printf("dingding %zu died\n", table->philos[phi].philo_id);
+			is_dead(true);
 			return (NULL);
 		}
-		pthread_mutex_lock(&table->stop_mutex);
+		pthread_mutex_unlock(&table->philos[phi].philo_mutex);
 		phi++;
 	}
-	pthread_mutex_unlock(&table->stop_mutex);
-	
+	printf("ended monitor check\n");
 	return (NULL);
 }
