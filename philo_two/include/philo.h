@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/30 15:52:22 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/31 16:36:38 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ typedef struct s_table {
 	pthread_mutex_t	stop_mutex;
 	pthread_t		hunger_thread;
 	bool			stop;
+	bool			has_printed_dead;
 }	t_table;
 
 typedef struct s_philo {
@@ -86,6 +87,7 @@ bool	am_i_dead(t_philo *philo);
 // fork.c
 void	assign_left_forks(t_table *table);
 void	unlock_forks(t_philo *philo);
+void	report_dead_philo(t_philo *philo);
 
 // utils.c
 size_t	get_time_millis(void);
@@ -101,7 +103,8 @@ bool	is_dead(bool dead_flag);
 void	*check_death(void *arg);
 
 // table.c
+bool	valid_int(size_t t);
 void	table_init(t_table *table, int argc, char *argv[]);
-t_table	*table();
+t_table	*table(void);
 
 #endif

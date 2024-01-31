@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:20:47 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/30 15:56:31 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/31 16:36:11 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	assign_left_forks(t_table *table)
 
 void	unlock_forks(t_philo *philo)
 {
-	if ((philo->philo_id + 1) % 2)
+	if ((philo->philo_id) % 2)
 	{
 		pthread_mutex_unlock(philo->right_fork);
 		if (philo->left_fork)
@@ -44,4 +44,18 @@ void	unlock_forks(t_philo *philo)
 	pthread_mutex_lock(&philo->philo_mutex);
 	philo->eating = 0;
 	pthread_mutex_unlock(&philo->philo_mutex);
+}
+
+void	report_dead_philo(t_philo *philo)
+{
+	print_philo_state(DEAD, philo);
+	is_dead(true);
+	pthread_mutex_lock(&philo->philo_mutex);
+	if (philo->eating)
+	{
+		pthread_mutex_unlock(&philo->philo_mutex);
+		unlock_forks(philo);
+	}
+	else
+		pthread_mutex_unlock(&philo->philo_mutex);
 }
