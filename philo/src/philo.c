@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 14:04:49 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/31 16:35:58 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/31 17:11:45 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@ void	*philo_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
+	print_philo_state(THINKING, philo);
 	if ((philo->philo_id) % 2 == 0)
 	{
-		print_philo_state(THINKING, philo);
 		mysleep(table()->time_to_eat / 2);
 	}
 	pthread_mutex_lock(&table()->stop_mutex);
@@ -75,7 +75,7 @@ bool	take_forks(t_philo *philo)
 
 bool	philo_eat(t_philo *philo)
 {
-	size_t	s;
+	//long	s;
 
 	print_philo_state(EATING, philo);
 	pthread_mutex_lock(&philo->philo_mutex);
@@ -91,10 +91,17 @@ bool	philo_eat(t_philo *philo)
 	if (am_i_dead(philo))
 		return (false);
 	print_philo_state(THINKING, philo);
-	s = (table()->time_to_die - (get_time_millis() - philo->last_eat_time)) / 2;
-	if (s > table()->time_to_eat)
-		s = table()->time_to_eat;
-	mysleep(s);
+	/*if ((table()->n_philo) % 2)
+		s = table()->time_to_die - table()->time_to_eat - table()->time_to_sleep - 50;
+	else
+		s = table()->time_to_die - (table()->time_to_eat * 2) - table()->time_to_sleep - 50;
+	if (s > (long) table()->time_to_eat || s < 0)
+	{
+		printf("%zu %zu|%d|%d\n", philo->philo_id, s, s > (long) table()->time_to_eat, s < 0);	
+		s = 0;
+	}
+	printf("%zu will think for %zu\n", philo->philo_id, s);
+	mysleep(s);*/
 	return (!is_dead(false));
 }
 
