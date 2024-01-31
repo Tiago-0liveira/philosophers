@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/13 17:07:12 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/22 19:43:37 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/31 15:24:23 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	mysleep(size_t millis)
 	size_t	start;
 
 	start = get_time_millis();
-	while (get_time_millis() - start < millis)
+	while (get_time_millis() - start < millis && !is_dead(false))
 		usleep(100);
 }
 

@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/03 20:03:14 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/22 20:38:02 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/31 16:36:38 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,6 @@ enum e_philo_state {
 	FINNISHED
 };
 
-enum e_fork_state {
-	FREE,
-	USED
-};
-
 typedef pthread_mutex_t	t_fork;
 
 typedef struct s_philo	t_philo;
@@ -60,41 +55,39 @@ typedef struct s_table {
 	size_t			n_eat;
 	t_fork			*forks;
 	t_philo			*philos;
-	pthread_mutex_t	mutex;
 	pthread_mutex_t	print_mutex;
-	pthread_mutex_t	dead_mutex;
-	pthread_mutex_t	eat_mutex;
 	pthread_mutex_t	stop_mutex;
+	pthread_t		hunger_thread;
 	bool			stop;
+	bool			has_printed_dead;
 }	t_table;
 
 typedef struct s_philo {
 	pthread_t			thread_id;
 	size_t				philo_id;
 	size_t				last_eat_time;
-	enum e_philo_state	state;
 	pthread_mutex_t		philo_mutex;
 	size_t				n_eat;
 	t_fork				*left_fork;
 	t_fork				*right_fork;
-	t_table				*table;
+	bool				eating;
 }	t_philo;
 
 // main.c
-bool	check_args(int argc, char *argv[]);
 void	start_simulation(t_table *table);
 void	free_and_exit(t_table *table);
 
 // philo.c
-void	init_philo(t_philo *philo, size_t id, t_table *table,
-			t_fork *right_fork);
+void	init_philo(t_philo *philo, size_t id, t_fork *right_fork);
 void	*philo_routine(void *arg);
-bool	philo_eat(t_philo *philo);
 bool	take_forks(t_philo *philo);
-void	*check_philo_death(void *arg);
+bool	philo_eat(t_philo *philo);
+bool	am_i_dead(t_philo *philo);
 
 // fork.c
 void	assign_left_forks(t_table *table);
+void	unlock_forks(t_philo *philo);
+void	report_dead_philo(t_philo *philo);
 
 // utils.c
 size_t	get_time_millis(void);
@@ -106,9 +99,12 @@ int		ft_atoi(const char *nptr);
 void	print_philo_state(enum e_philo_state state, t_philo *philo);
 void	start_threads(t_table *table);
 void	start_simulation(t_table *table);
-bool	is_dead(t_philo *philo, bool dead_flag);
+bool	is_dead(bool dead_flag);
+void	*check_death(void *arg);
 
 // table.c
+bool	valid_int(size_t t);
 void	table_init(t_table *table, int argc, char *argv[]);
+t_table	*table(void);
 
 #endif

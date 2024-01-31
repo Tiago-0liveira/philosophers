@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 15:38:06 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/24 19:04:40 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/31 16:02:22 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,13 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo)
 {
 	size_t	elapsed_time;
 
-	printf("hereher1\n");
-	if (is_dead(philo, false) || philo->table->stop)
+	elapsed_time = get_time_millis() - table()->start_time;
+	pthread_mutex_lock(&table()->print_mutex);
+	if (is_dead(false) || table()->has_printed_dead)
+	{
+		pthread_mutex_unlock(&table()->print_mutex);
 		return ;
-	printf("hereher2\n");
-	pthread_mutex_lock(&philo->table->print_mutex);
-	elapsed_time = philo->last_eat_time - philo->table->start_time;
+	}
 	if (state == THINKING)
 		printf(PHILO_FORMAT_THINKING, elapsed_time, philo->philo_id);
 	else if (state == EATING)
@@ -29,12 +30,15 @@ void	print_philo_state(enum e_philo_state state, t_philo *philo)
 	else if (state == SLEEPING)
 		printf(PHILO_FORMAT_SLEEPING, elapsed_time, philo->philo_id);
 	else if (state == DEAD)
+	{
 		printf(PHILO_FORMAT_DIED, elapsed_time, philo->philo_id);
+		table()->has_printed_dead = true;
+	}
 	else if (state == TOOK_FORK)
 		printf(PHILO_FORMAT_TOOK_FORK, elapsed_time, philo->philo_id);
 	else
 		printf("Error: invalid state\n");
-	pthread_mutex_unlock(&philo->table->print_mutex);
+	pthread_mutex_unlock(&table()->print_mutex);
 }
 
 void	start_threads(t_table *table)
@@ -45,6 +49,9 @@ void	start_threads(t_table *table)
 	i = 0;
 	while (i < table->n_philo)
 	{
+		pthread_mutex_lock(&table->philos[i].philo_mutex);
+		table->philos[i].last_eat_time = table->start_time;
+		pthread_mutex_unlock(&table->philos[i].philo_mutex);
 		if (pthread_create(&table->philos[i].thread_id, NULL,
 				philo_routine, &table->philos[i]) != 0)
 		{
@@ -53,6 +60,7 @@ void	start_threads(t_table *table)
 		}
 		i++;
 	}
+	pthread_create(&table->hunger_thread, NULL, check_death, table);
 }
 
 void	start_simulation(t_table *table)
@@ -67,26 +75,48 @@ void	start_simulation(t_table *table)
 	while (i < table->n_philo)
 	{
 		pthread_mutex_init(&table->forks[i], NULL);
-		init_philo(&table->philos[i], i, table, &table->forks[i]);
+		init_philo(&table->philos[i], i, &table->forks[i]);
 		i++;
 	}
 	assign_left_forks(table);
 	start_threads(table);
 }
 
-bool	is_dead(t_philo *philo, bool dead_flag)
+bool	is_dead(bool dead_flag)
 {
-	pthread_mutex_lock(&philo->table->dead_mutex);
+	pthread_mutex_lock(&table()->stop_mutex);
 	if (dead_flag)
-		philo->table->stop = true;
-	if (philo->last_eat_time == 0)
-		philo->last_eat_time = get_time_millis();
-	if (philo->table->stop || get_time_millis() - philo->last_eat_time
-		>= philo->table->time_to_die)
+		table()->stop = true;
+	if (table()->stop)
 	{
-		pthread_mutex_unlock(&philo->table->dead_mutex);
+		pthread_mutex_unlock(&table()->stop_mutex);
 		return (true);
 	}
-	pthread_mutex_unlock(&philo->table->dead_mutex);
+	pthread_mutex_unlock(&table()->stop_mutex);
 	return (false);
+}
+
+void	*check_death(void *arg)
+{
+	t_table	*table;
+	size_t	phi;
+
+	table = arg;
+	phi = 0;
+	while (!is_dead(false))
+	{
+		if (phi == table->n_philo)
+		{
+			mysleep(1);
+			phi = 0;
+		}
+		if (am_i_dead(&table->philos[phi]))
+		{
+			print_philo_state(DEAD, &table->philos[phi]);
+			is_dead(true);
+			return (NULL);
+		}
+		phi++;
+	}
+	return (NULL);
 }
