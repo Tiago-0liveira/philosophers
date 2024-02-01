@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 16:02:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/31 16:33:56 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/01/31 23:56:17 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ bool	validate_args(int argc, char **argv)
 	size_t	j;
 
 	i = 0;
-	while (i < (size_t) argc)
+	while (i < (size_t)argc)
 	{
 		j = 0;
 		while (argv[i][j])
@@ -44,9 +44,9 @@ void	table_init(t_table *table, int argc, char *argv[])
 	table->stop = false;
 	table->has_printed_dead = false;
 	table->n_philo = ft_atoi(argv[1]);
-	table->time_to_die = ft_atoi(argv[2]);
-	table->time_to_eat = ft_atoi(argv[3]);
-	table->time_to_sleep = ft_atoi(argv[4]);
+	table->time2die = ft_atoi(argv[2]);
+	table->time2eat = ft_atoi(argv[3]);
+	table->time2sleep = ft_atoi(argv[4]);
 	table->n_eat = -1;
 	if (argc == 6)
 	{
@@ -54,8 +54,8 @@ void	table_init(t_table *table, int argc, char *argv[])
 		if (!valid_int(table->n_eat))
 			exit(1);
 	}
-	if (!valid_int(table->n_philo) || !valid_int(table->time_to_die)
-		|| !valid_int(table->time_to_eat) || !valid_int(table->time_to_die))
+	if (!valid_int(table->n_philo) || !valid_int(table->time2die)
+		|| !valid_int(table->time2eat) || !valid_int(table->time2die))
 		exit(1);
 	pthread_mutex_init(&table->print_mutex, NULL);
 	pthread_mutex_init(&table->stop_mutex, NULL);
@@ -72,4 +72,23 @@ t_table	*table(void)
 			exit(1);
 	}
 	return (t);
+}
+
+bool	everyone_has_eaten(t_table *table)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < table->n_philo)
+	{
+		pthread_mutex_lock(&table->philos[i].philo_mutex);
+		if (table->philos[i].n_eat < table->n_eat)
+		{
+			pthread_mutex_unlock(&table->philos[i].philo_mutex);
+			return (false);
+		}
+		pthread_mutex_unlock(&table->philos[i].philo_mutex);
+		i++;
+	}
+	return (true);
 }

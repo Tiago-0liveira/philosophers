@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 15:38:06 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/01/31 16:02:22 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/01 00:42:29 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,9 @@ bool	is_dead(bool dead_flag)
 {
 	pthread_mutex_lock(&table()->stop_mutex);
 	if (dead_flag)
+	{
 		table()->stop = true;
+	}
 	if (table()->stop)
 	{
 		pthread_mutex_unlock(&table()->stop_mutex);
@@ -105,18 +107,15 @@ void	*check_death(void *arg)
 	phi = 0;
 	while (!is_dead(false))
 	{
-		if (phi == table->n_philo)
-		{
-			mysleep(1);
-			phi = 0;
-		}
+		if (everyone_has_eaten(table))
+			return (NULL);
 		if (am_i_dead(&table->philos[phi]))
 		{
 			print_philo_state(DEAD, &table->philos[phi]);
 			is_dead(true);
 			return (NULL);
 		}
-		phi++;
+		phi = (phi + 1) % table->n_philo;
 	}
 	return (NULL);
 }

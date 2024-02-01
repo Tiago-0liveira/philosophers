@@ -1,7 +1,7 @@
 NAME = philo
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread -g -fsanitize=address -static-libasan
+CFLAGS = -Wall -Wextra -Werror -pthread #-g -fsanitize=thread -static-libsan 
 
 SRC = main.c \
 		fork.c \
